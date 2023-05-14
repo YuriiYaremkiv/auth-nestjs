@@ -2,26 +2,36 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import AuthService from "../../services/AuthServices";
 
 class AuthActions {
-  static login = createAsyncThunk(
-    "auth/login",
+  static signin = createAsyncThunk(
+    "auth/signin",
     async ({ email, password }, { rejectWithValue }) => {
       try {
-        const { data } = await AuthService.login(email, password);
+        const { data } = await AuthService.signin({ email, password });
         return data;
       } catch (err) {
-        return rejectWithValue(err.message);
+        return rejectWithValue(err.response.data.messag);
       }
     }
   );
 
-  static register = createAsyncThunk(
-    "auth/register",
-    async ({ email, password }, { rejectWithValue }) => {
+  static signup = createAsyncThunk(
+    "auth/signup",
+    async ({ username, email, password }, { rejectWithValue }) => {
       try {
-        const { data } = await AuthService.register(email, password);
+        const { data } = await AuthService.signup({
+          username,
+          email,
+          password,
+        });
         return data;
       } catch (err) {
-        return rejectWithValue(err.message);
+        if (err?.response?.data?.message) {
+          return rejectWithValue(err.response.data.message);
+        } else {
+          return rejectWithValue(
+            "An error occurred with the network. Please check your connection."
+          );
+        }
       }
     }
   );
@@ -33,7 +43,7 @@ class AuthActions {
         const { data } = await AuthService.logout();
         return data;
       } catch (err) {
-        return rejectWithValue(err.message);
+        return rejectWithValue(err.response.data.messag);
       }
     }
   );
@@ -45,7 +55,7 @@ class AuthActions {
         const { data } = await AuthService.refresh();
         return data;
       } catch (err) {
-        return rejectWithValue(err.message);
+        return rejectWithValue(err.response.data.messag);
       }
     }
   );

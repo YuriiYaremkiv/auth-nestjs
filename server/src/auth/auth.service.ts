@@ -17,14 +17,10 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
-  async signUp(createUserDto: CreateUserDto): Promise<any> {
-    const userExists = await this.usersService.findByUsername(
-      createUserDto.username,
-    );
+  async signup(createUserDto: CreateUserDto): Promise<any> {
+    const userExists = await this.usersService.findByEmail(createUserDto.email);
 
-    if (userExists) {
-      throw new BadRequestException('User already exists');
-    }
+    if (userExists) throw new BadRequestException('User already exists');
 
     const hash = await this.hashData(createUserDto.password);
     const newUser = await this.usersService.create({
@@ -37,7 +33,7 @@ export class AuthService {
     return tokens;
   }
 
-  async signIn(data: AuthDto) {
+  async signin(data: AuthDto) {
     const user = await this.usersService.findByUsername(data.username);
     if (!user) throw new BadRequestException('User does not exist');
 

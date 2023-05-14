@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Formik } from "formik";
+import { Link } from "react-router-dom";
 import { AuthFormConfig } from "../config/auth-form.validation.js";
-import { TextField } from "@mui/material";
+import { Formik } from "formik";
+import { Box, TextField, Typography, useTheme } from "@mui/material";
 import { FormHelperText } from "@mui/material";
-import { Box } from "@mui/system";
-import { Typography } from "@mui/material";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import OutlinedInput from "@mui/material/OutlinedInput";
@@ -17,25 +15,23 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import LoadingButton from "@mui/lab/LoadingButton";
 import AuthActions from "../redux/auth/authOperations.js";
 
-export const FormLogin = () => {
+export const FormRegister = () => {
   const [showPassword, setShowPassword] = useState(false);
   const isLoading = useSelector((state) => state.auth.isLoading);
   const isErrorAuth = useSelector((state) => state.auth.error);
   const dispatch = useDispatch();
+  const { palette } = useTheme();
+
+  const handleFormSubmit = (values) => {
+    dispatch(AuthActions.signup(values));
+  };
 
   return (
     <Box>
       <Formik
-        onSubmit={(values) =>
-          dispatch(
-            AuthActions.login({
-              email: values.email.toLocaleLowerCase(),
-              password: values.password,
-            })
-          )
-        }
-        initialValues={AuthFormConfig.initialValuesLogin}
-        validationSchema={AuthFormConfig.loginSchema}
+        onSubmit={handleFormSubmit}
+        initialValues={AuthFormConfig.initialValuesRegister}
+        validationSchema={AuthFormConfig.registerSchema}
       >
         {({
           values,
@@ -50,6 +46,17 @@ export const FormLogin = () => {
             style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
           >
             <TextField
+              label="Username"
+              onBlur={handleBlur}
+              onChange={handleChange}
+              value={values.username}
+              name="username"
+              error={Boolean(touched.username && errors.username)}
+              helperText={touched.username && errors.username}
+              sx={{ height: "60px" }}
+            />
+
+            <TextField
               label="Email"
               onBlur={handleBlur}
               onChange={handleChange}
@@ -57,11 +64,10 @@ export const FormLogin = () => {
               name="email"
               error={Boolean(touched.email && errors.email)}
               helperText={touched.email && errors.email}
-              disabled={isLoading}
-              style={{ height: "60px" }}
+              sx={{ height: "60px" }}
             />
 
-            <FormControl variant="outlined">
+            <FormControl sx={{ gridColumn: "span 4" }} variant="outlined">
               <InputLabel
                 htmlFor="outlined-adornment-password"
                 error={Boolean(touched.password && errors.password)}
@@ -76,7 +82,6 @@ export const FormLogin = () => {
                 onBlur={handleBlur}
                 onChange={handleChange}
                 error={Boolean(touched.password && errors.password)}
-                disabled={isLoading}
                 endAdornment={
                   <InputAdornment position="end">
                     <IconButton
@@ -115,24 +120,25 @@ export const FormLogin = () => {
                 color: "#fff",
               }}
             >
-              <span>Sign In</span>
+              Sign Up
             </LoadingButton>
           </form>
         )}
       </Formik>
 
       <Box>
-        <Link to="/register" style={{ textDecoration: "none" }}>
+        <Link to="/" style={{ textDecoration: "none" }}>
           <Typography
             sx={{
-              textDecoration: "none",
+              marginBottom: "0.25rem",
+              color: palette.primary.main,
               "&:hover": {
                 cursor: "pointer",
                 textDecoration: "underline",
               },
             }}
           >
-            "Don't have an account? Sign Up here."
+            "Already have an account? Sign In here."
           </Typography>
         </Link>
         {isErrorAuth && (

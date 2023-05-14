@@ -13,32 +13,32 @@ export const authSlice = createSlice({
   name: "auth",
   initialState,
   extraReducers: (builder) => {
-    builder.addCase(AuthActions.register.pending, (state) => {
+    builder.addCase(AuthActions.signup.pending, (state) => {
       state.error = null;
       state.isLoading = true;
     });
-    builder.addCase(AuthActions.register.fulfilled, (state, action) => {
+    builder.addCase(AuthActions.signup.fulfilled, (state, action) => {
       state.user = action.payload.user;
       state.accessToken = action.payload.accessToken;
       state.isLogged = true;
       state.isLoading = false;
     });
-    builder.addCase(AuthActions.register.rejected, (state, action) => {
+    builder.addCase(AuthActions.signup.rejected, (state, action) => {
       state.error = action.payload;
       state.isLogged = false;
       state.isLoading = false;
     });
-    builder.addCase(AuthActions.login.pending, (state) => {
+    builder.addCase(AuthActions.signin.pending, (state) => {
       state.error = null;
       state.isLoading = true;
     });
-    builder.addCase(AuthActions.login.fulfilled, (state, action) => {
+    builder.addCase(AuthActions.signin.fulfilled, (state, action) => {
       state.user = action.payload.user;
       state.accessToken = action.payload.accessToken;
       state.isLogged = true;
       state.isLoading = false;
     });
-    builder.addCase(AuthActions.login.rejected, (state, action) => {
+    builder.addCase(AuthActions.signin.rejected, (state, action) => {
       state.error = action.payload;
       state.isLogged = false;
       state.isLoading = false;

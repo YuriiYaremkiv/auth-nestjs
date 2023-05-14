@@ -11,12 +11,12 @@ export class AuthController {
 
   @Post('signup')
   signup(@Body() createUserDto: CreateUserDto) {
-    return this.authService.signUp(createUserDto);
+    return this.authService.signup(createUserDto);
   }
 
   @Post('signin')
   signin(@Body() data: AuthDto) {
-    return this.authService.signIn(data);
+    return this.authService.signin(data);
   }
 
   @UseGuards(AccessTokenGuard)
