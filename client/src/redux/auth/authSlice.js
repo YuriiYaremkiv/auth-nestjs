@@ -7,6 +7,7 @@ const initialState = {
   isLoading: false,
   accessToken: null,
   error: null,
+  refreshAttempts: 0,
 };
 
 export const authSlice = createSlice({
@@ -44,7 +45,8 @@ export const authSlice = createSlice({
       state.isLoading = false;
     });
     builder.addCase(AuthActions.logout.pending, (state) => {
-      state.isLoading = false;
+      state.error = null;
+      state.isLoading = true;
     });
     builder.addCase(AuthActions.logout.fulfilled, (state) => {
       state.accessToken = null;
@@ -64,6 +66,7 @@ export const authSlice = createSlice({
     builder.addCase(AuthActions.refresh.fulfilled, (state, action) => {
       state.user = action.payload.user;
       state.accessToken = action.payload.accessToken;
+      state.refreshAttempts = 0;
       state.isLogged = true;
       state.isLoading = false;
     });
@@ -74,6 +77,15 @@ export const authSlice = createSlice({
       state.isLoading = false;
     });
   },
+  reducers: {
+    incrementRefreshAttempts: (state) => {
+      state.refreshAttempts += 1;
+    },
+    resetRefreshAttempts: (state) => {
+      state.refreshAttempts = 0;
+    },
+  },
 });
 
+export const { resetRefreshAttempts } = authSlice.actions;
 export default authSlice.reducer;

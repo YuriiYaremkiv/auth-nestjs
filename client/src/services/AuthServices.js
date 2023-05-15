@@ -10,7 +10,7 @@ class AuthService {
   }
 
   static async logout() {
-    return API.post("/auth/logout");
+    return API.get("/auth/logout");
   }
 
   static async refresh() {

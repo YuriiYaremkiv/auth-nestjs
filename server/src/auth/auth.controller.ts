@@ -1,35 +1,60 @@
-import { Controller, Get, Post, Body, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Res,
+  Body,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 import { RefreshTokenGuard } from 'src/common/guards/refreshToken.guard';
+import { Request, Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
-  signup(@Body() createUserDto: CreateUserDto) {
-    return this.authService.signup(createUserDto);
+  async signup(
+    @Body() createUserDto: CreateUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const tokens = await this.authService.signup(createUserDto);
+    res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true });
+    return { accessToken: tokens.accessToken };
   }
 
   @Post('signin')
-  signin(@Body() data: AuthDto) {
-    return this.authService.signin(data);
+  async signin(
+    @Body() authDto: AuthDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const tokens = await this.authService.signin(authDto);
+    res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true });
+    return { accessToken: tokens.accessToken };
   }
 
   @UseGuards(AccessTokenGuard)
   @Get('logout')
-  logout(@Req() req: any) {
-    this.authService.logout(req.user['sub']);
+  logout(@Req() req: any, @Res({ passthrough: true }) res: Response) {
+    res.cookie('refreshToken', null, { httpOnly: true });
+    this.authService.logout(req.user['id']);
   }
 
   @UseGuards(RefreshTokenGuard)
   @Get('refresh')
-  refreshTokens(@Req() req: any) {
-    const userId = req.user['sub'];
-    const refreshToken = req.user['refresToken'];
-    return this.authService.refreshTokens(userId, refreshToken);
+  async refreshTokens(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const userId = req.user['id'];
+    const refreshToken = req.cookies['refreshToken'];
+    const tokens = await this.authService.refreshTokens(userId, refreshToken);
+    res.cookie('refreshToken', tokens.refreshToken, { httpOnly: true });
+    return { accessToken: tokens.accessToken };
   }
 }

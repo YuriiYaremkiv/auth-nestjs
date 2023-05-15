@@ -14,32 +14,41 @@ export class UsersService {
     return createdUser.save();
   }
 
-  async findAll(): Promise<UserDocument[]> {
-    return this.userModel.find().exec();
-  }
-
-  async findById(id: string): Promise<UserDocument> {
-    return this.userModel.findById(id);
-  }
-
-  async findByEmail(email: string) {
-    return this.userModel.findOne({ email });
-  }
-
-  async findByUsername(username: string): Promise<UserDocument> {
-    return this.userModel.findOne({ username }).exec();
-  }
-
   async update(
-    id: string,
+    userId: string,
     updateUserDto: UpdateUserDto,
   ): Promise<UserDocument> {
     return this.userModel
-      .findByIdAndUpdate(id, updateUserDto, { new: true })
+      .findByIdAndUpdate(userId, updateUserDto, { new: true })
       .exec();
   }
 
   async remove(id: string): Promise<UserDocument> {
     return this.userModel.findByIdAndDelete(id).exec();
+  }
+
+  async isEmailOrUsernameTaken(username: string, email: string) {
+    const user = await this.userModel
+      .findOne({
+        $or: [{ email }, { username }],
+      })
+      .exec();
+
+    return {
+      usernameTaken: !!(user?.username === username),
+      emailTaken: !!(user?.email === email),
+    };
+  }
+
+  async findByEmail(email: string) {
+    return this.userModel.findOne({ email }).exec();
+  }
+
+  async findAll(): Promise<UserDocument[]> {
+    return this.userModel.find({}, { password: 0, refreshToken: 0 }).exec();
+  }
+
+  async findById(id: string): Promise<UserDocument> {
+    return this.userModel.findById(id);
   }
 }

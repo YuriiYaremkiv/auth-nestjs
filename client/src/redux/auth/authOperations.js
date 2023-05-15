@@ -9,7 +9,9 @@ class AuthActions {
         const { data } = await AuthService.signin({ email, password });
         return data;
       } catch (err) {
-        return rejectWithValue(err.response.data.messag);
+        return rejectWithValue(
+          err?.response?.data?.message || "An error occurred with the network"
+        );
       }
     }
   );
@@ -25,13 +27,9 @@ class AuthActions {
         });
         return data;
       } catch (err) {
-        if (err?.response?.data?.message) {
-          return rejectWithValue(err.response.data.message);
-        } else {
-          return rejectWithValue(
-            "An error occurred with the network. Please check your connection."
-          );
-        }
+        return rejectWithValue(
+          err?.response?.data?.message || "An error occurred with the network"
+        );
       }
     }
   );
@@ -43,7 +41,9 @@ class AuthActions {
         const { data } = await AuthService.logout();
         return data;
       } catch (err) {
-        return rejectWithValue(err.response.data.messag);
+        return rejectWithValue(
+          err?.response?.data?.message || "An error occurred with the network"
+        );
       }
     }
   );
@@ -55,7 +55,9 @@ class AuthActions {
         const { data } = await AuthService.refresh();
         return data;
       } catch (err) {
-        return rejectWithValue(err.response.data.messag);
+        return rejectWithValue(
+          err?.response?.data?.message || "An error occurred with the network"
+        );
       }
     }
   );

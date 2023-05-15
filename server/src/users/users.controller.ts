@@ -22,11 +22,13 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
+  @UseGuards(AccessTokenGuard)
   @Get()
   findAll() {
     return this.usersService.findAll();
   }
 
+  @UseGuards(AccessTokenGuard)
   @Get(':id')
   findById(@Param('id') id: string) {
     return this.usersService.findById(id);

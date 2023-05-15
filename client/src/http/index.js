@@ -1,5 +1,6 @@
 import axios from "axios";
 import AuthActions from "../redux/auth/authOperations.js";
+import { resetRefreshAttempts } from "../redux/auth/authSlice.js";
 
 let store;
 export const injectStore = (_store) => {
@@ -18,25 +19,32 @@ API.interceptors.request.use((config) => {
 });
 
 API.interceptors.response.use(
-  (config) => {
-    return config;
-  },
-  async (error) => {
-    const originalRequest = error.config;
-    if (
-      error.response.status === 401 &&
-      error.config &&
-      !error.config._isRetry
-    ) {
+  (config) => config,
+
+  async (err) => {
+    const originalRequest = err.config;
+
+    if (err.response.status === 401 && err.config && !err.config._isRetry) {
       originalRequest._isRetry = true;
       try {
-        await store.dispatch(AuthActions.refresh());
-        return API.request(originalRequest);
-      } catch (err) {
-        return Promise.reject(err.message);
+        const refreshAttempts = store.getState().auth.refreshAttempts;
+
+        if (refreshAttempts < 1) {
+          store.dispatch({ type: "auth/incrementRefreshAttempts" });
+
+          await store.dispatch(AuthActions.refresh());
+
+          return API(originalRequest);
+        } else {
+          store.dispatch(resetRefreshAttempts());
+          throw new Error("Authentication error");
+        }
+      } catch (error) {
+        store.dispatch(resetRefreshAttempts());
+        throw new Error("Authentication error");
       }
     }
-    return Promise.reject(error);
+    return Promise.reject(err);
   }
 );
 
